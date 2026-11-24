@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cook Fresh, Eat Healthy</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      font-family: "Segoe UI", Arial, sans-serif;
+      max-width: 820px;
+      margin: 28px auto;
+      padding: 0 16px 48px;
+      background: linear-gradient(135deg, #ecfdf5 0%, #eff6ff 55%, #fefce8 100%);
+      color: #1e293b;
+    }
+    .header-card {
+      background: #ffffff;
+      padding: 22px;
+      border-radius: 16px;
+      box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+      border-top: 6px solid #10b981;
+      margin-bottom: 20px;
+    }
+    .topic-title {
+      margin: 0 0 6px;
+      font-size: 26px;
+      font-weight: 700;
+      color: #065f46;
+    }
+    .sub-heading {
+      margin: 0 0 14px;
+      font-size: 16px;
+      font-weight: 500;
+      color: #475569;
+    }
+    .search-input {
+      width: 100%;
+      padding: 12px 14px;
+      border: 2px solid #cbd5e1;
+      border-radius: 10px;
+      font-size: 15px;
+      background: #f8fafc;
+      color: #0f172a;
+      margin-bottom: 14px;
+    }
+    .search-input:focus {
+      outline: none;
+      border-color: #10b981;
+      background: #ffffff;
+    }
+    .filter-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .filter-btn {
+      padding: 10px 16px;
+      border-radius: 999px;
+      border: 2px solid #cbd5e1;
+      background: #ffffff;
+      color: #334155;
+      font-weight: 700;
+      font-size: 14px;
+      cursor: pointer;
+    }
+    .filter-btn.active {
+      background: linear-gradient(90deg, #059669, #0284c7);
+      color: #ffffff;
+      border-color: transparent;
+    }
+    .count-bar {
+      margin: 12px 0 18px;
+      font-size: 14px;
+      font-weight: 600;
+      color: #0f766e;
+    }
+    .recipe-list {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .recipe-card {
+      background: #ffffff;
+      padding: 20px;
+      border-radius: 14px;
+      box-shadow: 0 6px 18px rgba(15, 23, 42, 0.06);
+      border-left: 6px solid #059669;
+    }
+    .recipe-title {
+      margin: 0 0 8px;
+      font-size: 19px;
+      color: #0f172a;
+    }
+    .pill {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+      margin: 0 6px 10px 0;
+    }
+    .pill-cat {
+      background: #dcfce7;
+      color: #166534;
+    }
+    .pill-cal {
+      background: #fef3c7;
+      color: #92400e;
+    }
+    .pill-time {
+      background: #e0f2fe;
+      color: #075985;
+    }
+    .detail-line {
+      margin: 6px 0;
+      line-height: 1.55;
+      font-size: 15px;
+    }
+    .card-footer {
+      margin-top: 14px;
+      padding-top: 12px;
+      border-top: 1px solid #e2e8f0;
+    }
+    .watch-btn {
+      display: inline-block;
+      padding: 10px 16px;
+      background: linear-gradient(90deg, #dc2626, #ea580c);
+      color: #ffffff;
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 14px;
+      border-radius: 8px;
+    }
+    .watch-btn:hover {
+      opacity: 0.94;
+    }
+    .empty-msg {
+      background: #ffffff;
+      padding: 24px;
+      border-radius: 14px;
+      text-align: center;
+      color: #475569;
+    }
+  </style>
+</head>
+<body>
+  <div class="header-card">
+    <h1 class="topic-title">Cook Fresh, Eat Healthy</h1>
+    <p class="sub-heading">Click the video below to watch and cook.</p>
+
+    <input
+      type="text"
+      id="searchBox"
+      class="search-input"
+      placeholder="Search by recipe name, ingredient (oats, egg, chia, chana, quinoa, soup...), or benefit..."
+    />
+
+    <div class="filter-row">
+      <button class="filter-btn active" data-category="all" type="button">All Picks</button>
+      <button class="filter-btn" data-category="breakfast" type="button">Breakfast</button>
+      <button class="filter-btn" data-category="meal" type="button">Meals</button>
+      <button class="filter-btn" data-category="snack" type="button">Snacks &amp; Drinks</button>
+    </div>
+  </div>
+
+  <div id="countBar" class="count-bar"></div>
+  <div id="recipeList" class="recipe-list"></div>
+
+  <script>
+    const basePicks = [
+      {
+        category: "breakfast",
+        categoryName: "Breakfast",
+        name: "Oats, Soy Milk & Chia Smoothie",
+        calories: "~300–420 kcal",
+        prepTime: "5–7 mins",
+        prepare: "Blend rolled oats and unsweetened soy milk with dates, chia seeds, and a touch of cocoa powder until smooth.",
+        benefit: "Delivers fiber, slow-release carbs, and plant protein for steady morning energy.",
+        videoLabel: "Watch Video",
+        videoUrl: "https://www.youtube.com/watch?v=tuOi8ofauhw"
+      },
+      {
+        category: "breakfast",
+        categoryName: "Breakfast",
+        name: "Simple Overnight Oats Jar",
+        calories: "~280–390 kcal",
+        prepTime: "5 mins (+ chill)",
+        prepare: "Combine rolled oats with milk or unsweetened plant milk, chia seeds, cinnamon, and fruit or nut butter, then chill.",
+        benefit: "Saves busy mornings while providing soluble fiber and lasting fullness.",
+        videoLabel: "Watch Video",
+        videoUrl: "https://www.youtube.com/watch?v=eNkZJrXKC70"
+      },
+      {
+        category: "breakfast",
+        categoryName: "Breakfast",
+        name: "Cottage Cheese Egg Bites",
+        calories: "~220–320 kcal",
+        prepTime: "25–30 mins",
+        prepare: "Whisk eggs with cottage cheese, chopped veggies, and a little shredded cheese, then bake until set.",
+        benefit: "High in protein and easy to batch-prep for busy weekday mornings.",
+        videoLabel: "Watch Video",
+        videoUrl: "https://www.youtube.com/watch?v=CshUJa9HPHc"
+      },
+      {
+        category: "breakfast",
+        categoryName: "Breakfast",
+        name: "Avocado & Egg Breakfast Prep",
+        calories: "~290 kcal",
+        prepTime: "10 mins",
+        prepare: "Pair boiled or cooked eggs with sliced avocado and simple seasonings for a balanced morning plate.",
+        benefit: "Combines protein and healthy fats to keep hunger steady.",
+        videoLabel: "Watch Video",
+        videoUrl: "https://www.youtube.com/watch?v=y3GK-ahxpL4"
+      },
+      {
+        category: "meal",
+        categoryName: "Meals",
+        name: "Kollu (Horse Gram) Soup with Veggies & Protein",
+        calories: "~240–380 kcal per bowl",
+        prepTime: "20–30 mins",
+        prepare: "Simmer horse gram with garlic, spices, chopped vegetables, and soya chunks or chicken until warm and flavorful.",
+        benefit: "High in protein and fiber to keep you satisfied and support muscle maintenance.",
+        videoLabel: "Watch Video",
+        videoUrl: "https://www.youtube.com/watch?v=2a5Ho8RY-Ks"
+      },
+      {
+        category: "meal",
+        categoryName: "Meals",
+        name: "One-Pot Beans & Quinoa Bowl",
+        calories: "~360–460 kcal",
+        prepTime: "25 mins",
+        prepare: "Simmer rinsed quinoa and black beans with diced bell pepper, onion, garlic, corn, tomato puree, and mild spices.",
+        benefit: "Plant-based protein and fiber make a filling, balanced lunch or dinner bowl.",
+        videoLabel: "Watch Video",
+        videoUrl: "https://www.youtube.com/watch?v=UsNNuJ6krVo"
+      },
+      {
+        category: "meal",
+        categoryName: "Meals",
+        name: "High-Protein Multi Dal Khichdi",
+        calories: "~320–430 kcal",
+        prepTime: "25 mins",
+        prepare: "Cook lentils and grains together with mild spices and vegetables into a soft one-pot meal.",
+        benefit: "Comforting, easy to digest, and rich in plant protein and fiber.",
+        videoLabel: "Watch Video",
+        videoUrl: "https://www.youtube.com/watch?v=jiY1iqzlv_k"
+      },
+      {
+        category: "meal",
+        categoryName: "Meals",
+        name: "Southwest Chicken Meal-Prep Bowl",
+        calories: "~380–480 kcal",
+        prepTime: "20 mins",
+        prepare: "Assemble seasoned chicken, grains or greens, beans, and veggies for an easy lunch or dinner bowl.",
+        benefit: "Balanced protein, carbs, and fiber for sustained afternoon or evening stamina.",
+        videoLabel: "Watch Video",
+        videoUrl: "https://www.youtube.com/watch?v=eYhj9jVdjcE"
+      },
+      {
+        category: "meal",
+        categoryName: "Meals",
+        name: "Mediterranean Healthy Meal Ideas",
+        calories: "~340–460 kcal",
+        prepTime: "20–30 mins",
+        prepare: "Pair lean proteins, whole grains, fresh herbs, vegetables, and olive oil for simple weeknight meals.",
+        benefit: "Focuses on fresh ingredients, unsaturated fats, and wholesome everyday nutrition.",
+        videoLabel: "Watch Video",
+        videoUrl: "https://www.youtube.com/watch?v=KDhnTZDiy00"
+      },
+      {
+        category: "snack",
+        categoryName: "Snacks & Drinks",
+        name: "Spiced Green Buttermilk (Neer Mor)",
+        calories: "~45–95 kcal per glass",
+        prepTime: "3–5 mins",
+        prepare: "Whisk curd with water, curry leaves, green chili, salt, and grated ginger or amla.",
+        benefit: "Light, hydrating, and refreshing with curd probiotics and bright flavor.",
+        videoLabel: "Watch Video",
+        videoUrl: "https://www.youtube.com/watch?v=qYsMRLINosI"
+      },
+      {
+        category: "snack",
+        categoryName: "Snacks & Drinks",
+        name: "Tangy Boiled Black Chana Chaat",
+        calories: "~160–240 kcal per bowl",
+        prepTime: "8–10 mins",
+        prepare: "Toss boiled black chana with chopped onion, tomato, green chili, coriander, spices, and lemon juice.",
+        benefit: "Savory, crunchy snack high in fiber and plant protein without deep frying.",
+        videoLabel: "Watch Video",
+        videoUrl: "https://www.youtube.com/watch?v=LasnqBieyfQ"
+      },
+      {
+        category: "snack",
+        categoryName: "Snacks & Drinks",
+        name: "Heart-Healthy Everyday Food Guide",
+        calories: "~120–260 kcal per snack",
+        prepTime: "2–5 mins",
+        prepare: "Enjoy a small portion of oats, apple slices, almonds, avocado, or a drizzle of olive oil in daily meals.",
+        benefit: "Highlights soluble fiber and unsaturated fat swaps in everyday eating habits.",
+        videoLabel: "Watch Video",
+        videoUrl: "https://www.youtube.com/watch?v=V0ALvVPHz-8"
+      }
+    ];
+
+    const recipeGroups = [
+      {
+        category: "breakfast",
+        categoryName: "Breakfast",
+        base: "Oats & Soy Milk Smoothie",
+        calBase: 310,
+        prepTime: "6 mins",
+        benefit: "Provides slow-release carbs, fiber, and plant protein for steady morning energy.",
+        styles: ["with Chia & Dates", "with Cocoa & Banana", "with Berries & Flax"],
+        addOns: ["+ Cinnamon", "+ Pumpkin Seeds", "+ Almond Butter", "+ Greek Yogurt"]
+      },
+      {
+        category: "breakfast",
+        categoryName: "Breakfast",
+        base: "Boiled & Spiced Egg Plate",
+        calBase: 220,
+        prepTime: "10 mins",
+        benefit: "Delivers complete protein and key micronutrients to stay full through the morning.",
+        styles: ["with Whole-Wheat Chapati", "with Sautéed Greens", "with Sliced Veggies & Pepper"],
+        addOns: ["+ Herbs", "+ Lemon Squeeze", "+ Avocado", "+ Chili Flakes"]
+      },
+      {
+        category: "breakfast",
+        categoryName: "Breakfast",
+        base: "Chia & Oats Morning Bowl",
+        calBase: 290,
+        prepTime: "8 mins",
+        benefit: "Supports digestive fiber intake and balanced morning fullness.",
+        styles: ["Warm Stovetop", "Chilled Overnight", "Spiced Cardamom"],
+        addOns: ["+ Sliced Fruit", "+ Chia Seeds", "+ Roasted Seeds", "+ Unsweetened Soy Milk"]
+      },
+      {
+        category: "meal",
+        categoryName: "Meals",
+        base: "Kollu (Horse Gram) & Veggie Soup",
+        calBase: 260,
+        prepTime: "22 mins",
+        benefit: "Rich in plant protein and fiber for a warm, filling lunch or dinner.",
+        styles: ["with Soya Chunks", "with Shredded Chicken", "with Mixed Garden Veggies"],
+        addOns: ["+ Garlic & Cumin", "+ Cracked Pepper", "+ Curry Leaves", "+ Lemon Juice"]
+      },
+      {
+        category: "meal",
+        categoryName: "Meals",
+        base: "Whole-Wheat Chapati & Protein Bowl",
+        calBase: 340,
+        prepTime: "18 mins",
+        benefit: "Balances complex whole-grain energy with protein for sustained afternoon or evening stamina.",
+        styles: ["with Boiled Black Chana", "with Boiled Eggs & Greens", "with Lentil & Veggie Curry"],
+        addOns: ["+ Cucumber Salad", "+ Spiced Curd", "+ Coriander", "+ Jeera Spice"]
+      },
+      {
+        category: "meal",
+        categoryName: "Meals",
+        base: "Lentil & Vegetable Comfort Bowl",
+        calBase: 320,
+        prepTime: "20 mins",
+        benefit: "Offers comforting warmth along with fiber and plant protein.",
+        styles: ["One-Pot Khichdi Style", "Spiced Broth Style", "Roasted Veggie & Bean Style"],
+        addOns: ["+ Spinach", "+ Tomato & Herbs", "+ Soya Chunks", "+ Ginger"]
+      },
+      {
+        category: "snack",
+        categoryName: "Snacks & Drinks",
+        base: "Spiced Green Buttermilk",
+        calBase: 65,
+        prepTime: "4 mins",
+        benefit: "Light, hydrating, and refreshing with curd probiotics and bright flavor.",
+        styles: ["with Ginger & Curry Leaves", "with Amla & Mint", "with Roasted Cumin"],
+        addOns: ["+ Green Chili", "+ Coriander", "+ Rock Salt", "+ Chilled Water"]
+      },
+      {
+        category: "snack",
+        categoryName: "Snacks & Drinks",
+        base: "Boiled Black Chana Snack Bowl",
+        calBase: 175,
+        prepTime: "8 mins",
+        benefit: "Protein- and fiber-dense savory snack that helps curb afternoon cravings.",
+        styles: ["Tangy Lemon Chaat", "Spiced Herb Toss", "Crunchy Veggie & Seed Mix"],
+        addOns: ["+ Chopped Onion & Tomato", "+ Pumpkin Seeds", "+ Fresh Coriander", "+ Chat Masala"]
+      },
+      {
+        category: "snack",
+        categoryName: "Snacks & Drinks",
+        base: "Seeds & Refreshing Sipper",
+        calBase: 165,
+        prepTime: "5 mins",
+        benefit: "Convenient pick-me-up combining minerals, healthy fats, or light hydration.",
+        styles: ["Roasted Pumpkin Seeds", "Chia & Citrus Cooler", "Spiced Berry & Yogurt Drink"],
+        addOns: ["+ Lime Juice", "+ Cinnamon", "+ Flax & Chia", "+ Light Seasoning"]
+      }
+    ];
+
+    const extraPicks = [];
+    for (const grp of recipeGroups) {
+      for (let s = 0; s < grp.styles.length; s++) {
+        for (let a = 0; a < grp.addOns.length; a++) {
+          const style = grp.styles[s];
+          const addOn = grp.addOns[a];
+          const lowCal = grp.calBase + (s * 15) + (a * 10);
+          const highCal = lowCal + 55;
+          const title = `${grp.base} ${style} ${addOn}`;
+          const searchQuery = encodeURIComponent(`${title} healthy recipe english`);
+
+          extraPicks.push({
+            category: grp.category,
+            categoryName: grp.categoryName,
+            name: title,
+            calories: `~${lowCal}–${highCal} kcal`,
+            prepTime: grp.prepTime,
+            prepare: `Start with ${grp.base.toLowerCase()} ${style.toLowerCase()}, add ${addOn.toLowerCase()}, and serve right away.`,
+            benefit: grp.benefit,
+            videoLabel: "Watch Video",
+            videoUrl: `https://www.youtube.com/results?search_query=${searchQuery}`
+          });
+        }
+      }
+    }
+
+    const allPicks = [...basePicks, ...extraPicks];
+
+    let activeCategory = "all";
+    const searchBox = document.getElementById("searchBox");
+    const filterButtons = document.querySelectorAll(".filter-btn");
+    const recipeList = document.getElementById("recipeList");
+    const countBar = document.getElementById("countBar");
+
+    function renderPicks() {
+      const term = searchBox.value.trim().toLowerCase();
+
+      const filtered = allPicks.filter((item) => {
+        const matchesCategory = activeCategory === "all" || item.category === activeCategory;
+        const searchableText = [
+          item.name,
+          item.categoryName,
+          item.calories,
+          item.prepTime,
+          item.prepare,
+          item.benefit
+        ].join(" ").toLowerCase();
+
+        const matchesSearch = !term || searchableText.includes(term);
+        return matchesCategory && matchesSearch;
+      });
+
+      countBar.textContent = `${filtered.length} option${filtered.length === 1 ? "" : "s"} available — scroll down to browse.`;
+
+      if (filtered.length === 0) {
+        recipeList.innerHTML = `<div class="empty-msg">No matching options found. Try clearing the search box or choosing another category.</div>`;
+        return;
+      }
+
+      recipeList.innerHTML = filtered.map((item) => `
+        <article class="recipe-card">
+          <h2 class="recipe-title">${item.name}</h2>
+          <span class="pill pill-cat">${item.categoryName}</span>
+          <span class="pill pill-cal">Calories: ${item.calories}</span>
+          <span class="pill pill-time">Prep: ${item.prepTime}</span>
+          <p class="detail-line"><strong>Prepare:</strong> ${item.prepare}</p>
+          <p class="detail-line"><strong>Benefit:</strong> ${item.benefit}</p>
+          <div class="card-footer">
+            <a class="watch-btn" href="${item.videoUrl}" target="_blank" rel="noopener noreferrer">
+              ${item.videoLabel}
+            </a>
+          </div>
+        </article>
+      `).join("");
+    }
+
+    filterButtons.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        filterButtons.forEach((b) => b.classList.remove("active"));
+        btn.classList.add("active");
+        activeCategory = btn.dataset.category;
+        renderPicks();
+      });
+    });
+
+    searchBox.addEventListener("input", renderPicks);
+
+    renderPicks();
+  </script>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
+    import { initializeAppCheck, ReCaptchaEnterpriseProvider } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app-check.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBX4hyR8XhJfFNsmzrPLwOMvOvbSLnoXps",
+      authDomain: "quickreply-ai-b1a6a.firebaseapp.com",
+      projectId: "quickreply-ai-b1a6a",
+      storageBucket: "quickreply-ai-b1a6a.firebasestorage.app",
+      messagingSenderId: "525928543958",
+      appId: "1:525928543958:web:e35442d44f5702f57c3b77"
+    };
+
+    const app = initializeApp(firebaseConfig);
+
+    initializeAppCheck(app, {
+      provider: new ReCaptchaEnterpriseProvider("6LddRzAuAAAAACNxUAiTfLeRPUdRoQyfect7UNIe"),
+      isTokenAutoRefreshEnabled: true
+    });
+  </script>
+</body>
+</html>
