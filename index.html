@@ -504,9 +504,56 @@
     const app = initializeApp(firebaseConfig);
 
     initializeAppCheck(app, {
-      provider: new ReCaptchaEnterpriseProvider("6LddRzAuAAAAACNxUAiTfLeRPUdRoQyfect7UNIe"),
-      isTokenAutoRefreshEnabled: true
-    });
-  </script>
+    provider: new ReCaptchaEnterpriseProvider("6LddRzAuAAAAACNxUAiTfLeRPUdRoQyfect7UNIe"),
+    isTokenAutoRefreshEnabled: true
+  });
+</script>
+
+<section id="ai-recipe-helper" style="margin-top:20px;padding:16px;background:#fff;border-radius:12px;">
+  <h3>Healthy Recipe AI Helper</h3>
+  <input id="recipe-input" type="text" placeholder="Enter ingredients (e.g., oats, spinach, eggs)" style="width:70%;padding:8px;" />
+  <button id="recipe-btn" type="button" style="padding:8px 14px;">Ask AI</button>
+  <p id="recipe-output" style="margin-top:12px;white-space:pre-line;"></p>
+</section>
+
+<script type="module">
+  import { getApp, getApps, initializeApp } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-app.js";
+  import { getAI, getGenerativeModel, GoogleAIBackend, InferenceMode } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-ai.js";
+
+  const existingConfig = {
+    apiKey: "AIzaSyBX4hyR8XhJfFNsmzrPLwOMv0vbSLnoXps",
+    authDomain: "quickreply-ai-b1a6a.firebaseapp.com",
+    projectId: "quickreply-ai-b1a6a",
+    storageBucket: "quickreply-ai-b1a6a.firebasestorage.app",
+    messagingSenderId: "525928543958",
+    appId: "1:525928543958:web:e35442d44f5702f57c3b77"
+  };
+
+  const app = getApps().length ? getApp() : initializeApp(existingConfig);
+  const ai = getAI(app, { backend: new GoogleAIBackend() });
+  const model = getGenerativeModel(ai, {
+    model: "gemini-3.5-flash-lite",
+    mode: InferenceMode.PREFER_ON_DEVICE
+  });
+
+  const inputEl = document.getElementById("recipe-input");
+  const btnEl = document.getElementById("recipe-btn");
+  const outEl = document.getElementById("recipe-output");
+
+  btnEl.addEventListener("click", async () => {
+    const ingredients = inputEl.value.trim();
+    if (!ingredients) {
+      outEl.textContent = "Please type some ingredients first.";
+      return;
+    }
+    outEl.textContent = "Thinking...";
+    try {
+      const result = await model.generateContent(`Give a quick, healthy recipe using: ${ingredients}`);
+      outEl.textContent = result.response.text();
+    } catch (err) {
+      outEl.textContent = "Error: " + err.message;
+    }
+  });
+</script>
 </body>
 </html>
